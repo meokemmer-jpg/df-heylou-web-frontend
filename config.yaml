@@ -1,0 +1,111 @@
+df_id: df-heylou-web-frontend
+df_name: HeyLou-Webseite-Onboarding-Hub
+welle_introduced: welle-38
+type: foundation-df
+crux-mk: true
+
+stack:
+  framework: Next.js-15
+  language: TypeScript-5.7
+  ui: Tailwind-4 + shadcn-ui
+  auth: Clerk
+  database: Postgres-Supabase
+  deploy: Vercel
+
+cascade_isolation: hard
+failure_blast_radius: 1
+output_feeds_into_training: false
+provenance_required_in_output: true
+non_llm_validation_layer: true
+
+external_anchor_type: stripe_webhook_hmac
+external_anchor_validation_frequency: per_request
+acknowledged_no_external_anchor: false
+
+pre_action_domain_check: true
+pre_action_backup_check: false  # serverless: no local backup
+pre_action_blast_radius_check: true
+
+concurrent_spawn_protection: stateless_serverless
+lock_dir: n/a-serverless
+lock_stale_age_h: n/a
+engine_pgrep_check: false
+lock_release_on: n/a
+
+override_complexity: single_command  # Vercel-Console + Clerk-Dashboard
+override_documentation_freshness_days: 30
+martin_review_cadence: weekly
+bus_factor_handover_drilled: false  # Welle-39-Pending
+
+pipeline_cost_estimate_required: true
+cost_estimate_method: static_pre_run
+quota_budget_ceiling: 100  # max 9OS-Aktivierungen/Tag
+cost_overrun_action: hard_stop
+
+entropy_added_loc_estimate: 3000
+entropy_added_concepts:
+  - hotelier-onboarding-wizard
+  - 9os-coupling-validator
+  - heylou-api-connector
+  - stripe-webhook-handler
+entropy_justified_by_rho: 50_eur_per_loc  # Hotelier-Conversion-Wert
+entropy_subtractive_potential: false
+
+lose_coupling:
+  LC1_graceful_degradation:
+    degradation_modes:
+      - full              # alle deps verfuegbar
+      - degraded_no_db    # Postgres down → in-memory-fallback (read-only)
+      - degraded_no_clerk # Clerk down → static-landing + waitlist-form
+      - standalone_static # alle deps down → static-pages only
+    degradation_test_required: true
+  LC2_direct_mode:
+    direct_mode_available: true
+    direct_mode_capability: 0.7
+    direct_mode_trigger: "any dependency unreachable >10s"
+  LC3_circuit_breaker:
+    circuit_breaker_timeout_s: 10
+    circuit_breaker_open_threshold: 3
+    circuit_breaker_half_open_test_interval_s: 60
+  LC4_failure_isolation:
+    state_externalization: true
+    idempotent_operations: true
+    dependency_dlq_separate: true
+  LC5_health_check:
+    health_check_dependencies: []  # eigene Funktion = Next.js-Render
+    health_check_degraded_score: 0.7
+    health_check_endpoint_or_file: /api/health
+
+evidence_grade_target: PRE-PRODUCTION-CONDITIONAL
+evidence_grade_path:
+  K11_cascade: 3  # Negative-Test in tests/api-onboarding.test.ts
+  K12_distillation: 4  # provenance-Tags in audit-log.ts
+  K13_ground_truth: 4  # stripe-webhook-hmac.test.ts passing
+  K14_override: 1  # DOC only (Welle-39-Pflicht)
+  K15_entropy: 4  # 3000 LOC justified
+  K16_spawn_mutex: 4  # stateless_serverless
+
+cross_df_dependencies:
+  - target: df-9os-next
+    method: POST /api/9os/activate
+    api_contract: lib/9os-coupling.ts::activate9OSCoupling
+    stability: STABLE (welle-38+)
+  - target: df-heylou-travel-domain
+    method: GET /api/heylou/*
+    api_contract: lib/heylou-api.ts::fetchHeyLouData
+    stability: STABLE (welle-38+)
+
+tests:
+  vitest_count: 33
+  playwright_count: 13
+  total: 46
+  passing_at_dispatch: 0  # to be implemented
+
+deployment:
+  type: serverless
+  platform: Vercel
+  launchagent_required: false
+  deploy_script: scripts/deploy-vercel.sh
+  phronesis_ticket_required_for_production: true
+
+# CRUX-MK
