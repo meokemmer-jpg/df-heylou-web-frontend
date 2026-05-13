@@ -4,6 +4,21 @@ welle_introduced: welle-38
 type: foundation-df
 crux-mk: true
 
+default_action:
+  description: "Next.js-15 Onboarding-Hub Render (Web-Frontend) fuer Hotelier-Onboarding-Requests + Clerk-Auth + Supabase-DB + Vercel-Deploy"
+  rho_per_run_eur: 30
+  rho_validation_source: unvalidated
+  block_gates:
+    - gate_id: K11
+      block_reason: "Cascade-Containment Frontend → Backend (Auth-API down = nur Read-Only-Mode)"
+      false_block_cost_eur: 20
+      legitimate_block_condition: "Clerk-Auth-API >5min-down ODER Supabase-Connection-Pool exhausted"
+    - gate_id: K13
+      block_reason: "Pre-Action-Verification fuer Production-Vercel-Deploy"
+      false_block_cost_eur: 15
+      legitimate_block_condition: "Deploy ohne PHRONESIS_TICKET in Production-Mode"
+  graceful_degradation_path: "Static-Fallback-Page via Vercel-Edge-Cache wenn Backend down (Read-Only-Browse)"
+
 stack:
   framework: Next.js-15
   language: TypeScript-5.7
