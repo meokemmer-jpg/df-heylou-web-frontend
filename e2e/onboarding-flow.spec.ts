@@ -28,8 +28,10 @@ test.describe("Onboarding-Flow", () => {
 
   test("Schritt 3: Hotel-Daten-Form valid submit", async ({ page }) => {
     await page.goto("/onboarding/hotel-data");
-    await page.fill('input[type="text"]', "Hotel E2E Test");
-    await page.fill('input[required]:nth-of-type(2)', "Teststr 1, Berlin").catch(() => undefined);
+    await page.fill('[name="hotelName"]', "Hotel E2E Test");
+    await page.fill('[name="address"]', "Teststr. 1, 10115 Berlin");
+    await page.selectOption('[name="pmsType"]', "mews");
+    await page.fill('[name="roomCount"]', "30");
     await page.click('button[type="submit"]');
     await expect(page.locator("text=Weiter zu Schritt 4")).toBeVisible();
   });

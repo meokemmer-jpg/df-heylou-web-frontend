@@ -1,26 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { loadHotelDraft, type HotelDraft } from "@/lib/onboarding-draft";
 
 export default function OnboardingNineOSPage() {
   const [activating, setActivating] = useState(false);
   const [status, setStatus] = useState<"idle" | "pending" | "active" | "failed">("idle");
+  const [draft, setDraft] = useState<HotelDraft | null>(null);
+
+  useEffect(() => {
+    setDraft(loadHotelDraft());
+  }, []);
 
   async function handleActivate() {
     setActivating(true);
     setStatus("pending");
     try {
+      const hotelId = crypto.randomUUID();
+      const payload = draft
+        ? {
+            id: hotelId,
+            name: draft.name,
+            address: draft.address,
+            pmsType: draft.pmsType,
+            roomCount: draft.roomCount,
+          }
+        : {
+            id: "demo-hotel-001",
+            name: "Demo Hotel Berlin",
+            address: "Friedrichstr. 1, 10117 Berlin",
+            pmsType: "mews",
+            roomCount: 42,
+          };
       const resp = await fetch("/api/9os/activate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: "demo-hotel-001",
-          name: "Demo Hotel Berlin",
-          address: "Friedrichstr. 1, 10117 Berlin",
-          pmsType: "mews",
-          roomCount: 42,
-        }),
+        body: JSON.stringify(payload),
       });
       const body = await resp.json() as { ok: boolean; status?: string };
       setStatus(body.ok ? "active" : "failed");
@@ -37,6 +53,11 @@ export default function OnboardingNineOSPage() {
       <p className="mt-2 text-neutral-600">
         Verbindung mit 9OS-NEXT (Revenue Management + Channel Manager + PMS-Sync).
       </p>
+      {draft && (
+        <p className="mt-3 rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-800">
+          Hotel: <strong>{draft.name}</strong> · {draft.roomCount} Zimmer · {draft.pmsType.toUpperCase()}
+        </p>
+      )}
       <button
         onClick={handleActivate}
         disabled={activating || status === "active"}

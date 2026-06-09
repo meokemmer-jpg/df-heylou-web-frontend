@@ -111,10 +111,10 @@ cross_df_dependencies:
     stability: STABLE (welle-38+)
 
 tests:
-  vitest_count: 33
+  vitest_count: 48
   playwright_count: 13
-  total: 46
-  passing_at_dispatch: 0  # to be implemented
+  total: 61
+  passing_at_dispatch: 48  # vitest all green; playwright requires running server
 
 deployment:
   type: serverless

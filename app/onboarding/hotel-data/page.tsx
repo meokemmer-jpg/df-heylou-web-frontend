@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { HOTEL_DRAFT_KEY, saveHotelDraft } from "@/lib/onboarding-draft";
+
+export { HOTEL_DRAFT_KEY };
 
 export default function OnboardingHotelDataPage() {
   const [name, setName] = useState("");
@@ -12,6 +15,7 @@ export default function OnboardingHotelDataPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    saveHotelDraft({ name, address, pmsType, roomCount });
     setSubmitted(true);
   }
 
@@ -22,6 +26,8 @@ export default function OnboardingHotelDataPage() {
         <label className="block">
           <span className="text-sm font-medium">Hotel-Name</span>
           <input
+            id="hotelName"
+            name="hotelName"
             type="text"
             required
             minLength={2}
@@ -33,8 +39,11 @@ export default function OnboardingHotelDataPage() {
         <label className="block">
           <span className="text-sm font-medium">Adresse</span>
           <input
+            id="address"
+            name="address"
             type="text"
             required
+            minLength={5}
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             className="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2"
@@ -43,6 +52,8 @@ export default function OnboardingHotelDataPage() {
         <label className="block">
           <span className="text-sm font-medium">PMS-Typ</span>
           <select
+            id="pmsType"
+            name="pmsType"
             value={pmsType}
             onChange={(e) => setPmsType(e.target.value as typeof pmsType)}
             className="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2"
@@ -56,6 +67,8 @@ export default function OnboardingHotelDataPage() {
         <label className="block">
           <span className="text-sm font-medium">Zimmer-Anzahl</span>
           <input
+            id="roomCount"
+            name="roomCount"
             type="number"
             required
             min={1}
